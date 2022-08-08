@@ -14,6 +14,8 @@ class CsvExport extends AbstractExporter
     protected $debug = false;
     protected $dealColumnList = [];
     protected $columnCallback = null;
+    protected $addColumnList = [];
+    protected $appendColumn = [];
 
     /**
      * 导出
@@ -24,6 +26,7 @@ class CsvExport extends AbstractExporter
         $model = $this;
         $grid = $this->grid;
         $columns = $this->getColumns();
+        $columns = $this->addingColumn($columns);
         $call_back = function ($page, $limit) use ($model, $grid, $columns) {
             $model->page = $page;
             $grid->paginate($limit);
@@ -66,6 +69,56 @@ class CsvExport extends AbstractExporter
     }
 
     /**
+     * 添加字段
+     * @param $column
+     * @param $name
+     * @param null|string|\Closure $after_column
+     * @param null|\Closure $call_back
+     */
+    public function addColumn($column, $name, $after_column = null, $call_back = null)
+    {
+        if ($after_column instanceof \Closure) {
+            $this->addColumnList[$column] = $after_column;
+            $this->appendColumn[$column] = [$name, null];
+        } else if ($call_back instanceof \Closure) {
+            $this->addColumnList[$column] = $call_back;
+            $this->appendColumn[$column] = [$name, $after_column];
+        } else {
+            $this->appendColumn[$column] = [$name, $after_column];
+        }
+
+    }
+
+    /**
+     * 正式追加字段
+     * @param $columns
+     * @return array
+     */
+    protected function addingColumn($columns)
+    {
+        if (!$this->appendColumn) {
+            return $columns;
+        }
+        $keys = array_keys($columns);
+        foreach ($this->appendColumn as $column => $item) {
+            list ($name, $after_column) = $item;
+            if (!empty($after_column) && in_array($after_column, $keys)) {
+                $temp = [];
+                foreach ($columns as $c => $n) {
+                    $temp[$c] = $n;
+                    if ($c == $after_column) {
+                        $temp[$column] = $name;
+                    }
+                }
+                $columns = $temp;
+            } else {
+                $columns[$column] = $name;
+            }
+        }
+        return $columns;
+    }
+
+    /**
      * 字段值重新处理 回调函数
      * @param \Closure $call_back
      */
@@ -80,10 +133,11 @@ class CsvExport extends AbstractExporter
      * @param $list
      * @return mixed
      */
-    public function dealColumn($columns, $list)
+    protected function dealColumn($columns, $list)
     {
         if (!$list) return $list;
         $deal = array_keys($this->dealColumnList);
+        $add = array_keys($this->addColumnList);
         foreach ($list as $index => $data) {
             foreach ($columns as $column => $name) {
                 switch ($column) {
@@ -100,7 +154,10 @@ class CsvExport extends AbstractExporter
                         break;
                 }
                 if ($this->dealColumnList && in_array($column, $deal)) {
-                    $data[$column] = call_user_func_array($this->dealColumnList[$column], [$data[$column], $data]);
+                    $data[$column] = call_user_func_array($this->dealColumnList[$column], [$data[$column] ?? '', $data]);
+                }
+                if ($this->addColumnList && in_array($column, $add)) {
+                    $data[$column] = call_user_func($this->addColumnList[$column], $data);
                 }
             }
             $list[$index] = $data;
@@ -112,7 +169,7 @@ class CsvExport extends AbstractExporter
      * 获取选中的导出字段
      * @return array
      */
-    public function getColumns()
+    protected function getColumns()
     {
         $columns = [];
         foreach ($this->grid->getColumns() as $column) {

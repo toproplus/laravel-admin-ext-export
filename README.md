@@ -35,6 +35,29 @@ $csvExport->setColumn('name', function ($name, $data) {
 });
 ```
 
+- 追加导出的字段
+```php
+// 追加表格中未显示，但列表数据中已存在的字段值
+$csvExport->addColumn('goods_spec', '商品规格');
+// 追加字段并修改输出的值
+$csvExport->addColumn('goods_spec', '商品规格', function($data) {
+    return '规格：' . $data['goods_spec'];
+});
+// 追加到指定字段的后面
+// 追加 goods_spec 到 goods_name 的后面
+$csvExport->addColumn('goods_spec', '商品规格', 'goods_name');
+// 追加到指定字段后，并修改输出值
+$csvExport->addColumn('goods_spec', '商品规格', 'goods_name', function($data) {
+    return '规格：' . $data['goods_spec'];
+});
+// 追加不存在的字段并设置输出值
+// 追加不存在的字段，一定要设置输出值
+$csvExport->addColumn('hahaha', '哈哈哈', function($data) {
+    return '哈哈哈' . $data['name'];
+});
+
+``` 
+
 - 列表数据重新整理
  ```php
  $csvExport->setList(function ($columns, $list) {
