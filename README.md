@@ -20,7 +20,7 @@ $grid->exporter(new CsvExport());
 - 自定义导出文件名
 ```php
 $csvExport = new CsvExport();
-$csvExport->setFileName('会员列表');
+$csvExport->setName('会员列表');
 $grid->exporter($csvExport);
 ```
 - 修改字段输出值
@@ -37,7 +37,7 @@ $csvExport->setColumn('name', function ($name, $data) {
 
 - 列表数据重新整理
  ```php
- $csvExport->setColumnCallback(function ($columns, $list) {
+ $csvExport->setList(function ($columns, $list) {
      foreach ($list as $index => $data) {
          foreach ($columns as $column => $name) {
              switch ($column) {

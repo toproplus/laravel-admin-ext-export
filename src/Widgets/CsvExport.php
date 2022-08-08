@@ -48,7 +48,7 @@ class CsvExport extends AbstractExporter
      * 设置文件名
      * @param null $file_name
      */
-    public function setFileName($file_name = null)
+    public function setName($file_name = null)
     {
         if ($file_name) {
             $this->fileName = $file_name;
@@ -69,7 +69,7 @@ class CsvExport extends AbstractExporter
      * 字段值重新处理 回调函数
      * @param \Closure $call_back
      */
-    public function setColumnCallback(\Closure $call_back)
+    public function setList(\Closure $call_back)
     {
         $this->columnCallback = $call_back;
     }
