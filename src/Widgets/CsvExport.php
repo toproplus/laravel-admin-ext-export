@@ -103,19 +103,18 @@ class CsvExport extends AbstractExporter
         foreach ($this->appendColumn as $column => $item) {
             list ($name, $after_column) = $item;
             if (!empty($after_column) && in_array($after_column, $keys)) {
-                $temp = [];
-                foreach ($columns as $c => $n) {
-                    $temp[$c] = $n;
-                    if ($c == $after_column) {
-                        $temp[$column] = $name;
-                    }
-                }
-                $columns = $temp;
+                $index = array_search($after_column, $keys);
+                array_splice($keys, $index + 1, 0, $column);
             } else {
-                $columns[$column] = $name;
+                array_push($keys, $column);
             }
+            $columns[$column] = $name;
         }
-        return $columns;
+        $result = [];
+        foreach ($keys as $column) {
+            $result[$column] = $columns[$column] ?? $column;
+        }
+        return $result;
     }
 
     /**
