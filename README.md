@@ -50,6 +50,8 @@ $csvExport->addColumn('goods_spec', '商品规格', 'goods_name');
 $csvExport->addColumn('goods_spec', '商品规格', 'goods_name', function($data) {
     return '规格：' . $data['goods_spec'];
 });
+// 追加二维（或多维）数组下的字段，键用“.”相连
+$csvExport->addColumn('posts.comments.user_id', '文章评论人ID');
 // 追加不存在的字段并设置输出值
 // 追加不存在的字段，一定要设置输出值
 $csvExport->addColumn('hahaha', '哈哈哈', function($data) {
