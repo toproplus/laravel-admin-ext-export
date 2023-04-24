@@ -39,8 +39,9 @@ trait exportTraint
             foreach ($data_list as $data) {
                 $row = [];
                 foreach ($head_list as $key => $name) {
-                    $value = $data[$key] ?? '';
-                    $row[] = iconv('utf-8', 'gbk', $value);
+                    $value = (string) $data[$key] ?? '';
+                    $row[] = mb_convert_encoding($value, 'gbk', 'utf-8');
+//                    $row[] = iconv('utf-8', 'gbk', $value);
                 }
                 fputcsv($fp, $row);
             }
